@@ -2,27 +2,28 @@
 export default {
   moods: [
     {
-      name: "Happy",
+      name: "Happy 🥳",
       description: "Feel-good movies to brighten your day.",
+      url: "/happy",
     },
     {
-      name: "Sad",
+      name: "Sad 😔",
       description: "Heart-wrenching stories for when you need a good cry.",
     },
     {
-      name: "Excited",
+      name: "Excited 🤠",
       description: "Adrenaline-pumping films for thrill seekers.",
     },
     {
-      name: "Calm",
+      name: "Calm 🥱",
       description: "Relaxing and serene movies to help you unwind.",
     },
     {
-      name: "Romantic",
+      name: "Romantic 🥰",
       description: "Love stories to warm your heart.",
     },
     {
-      name: "Adventurous",
+      name: "Adventurous 🏞️",
       description: "Epic journeys and daring escapades.",
     },
   ],

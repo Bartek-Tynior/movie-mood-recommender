@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { cn } from "./lib/utils";
 import "./styles/globals.css";
+import { Navbar } from "./components/Navbar";
+import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,7 +28,12 @@ export default function RootLayout({
           satoshi.variable
         )}
       >
+        <Navbar />
+
         {children}
+
+        <Footer />
+        
       </body>
     </html>
   );
