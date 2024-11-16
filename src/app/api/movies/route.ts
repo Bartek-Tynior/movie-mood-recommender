@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
+const MOVIE_DB_API_KEY = process.env.MOVIE_DB_KEY;
+
 const moodToGenre = {
   Happy: 35, // Comedy
   Sad: 18, // Drama
@@ -27,7 +29,7 @@ export async function GET(req) {
   }
 
   const genreId = moodToGenre[mood];
-  const url = `https://api.themoviedb.org/3/discover/movie?api_key=cd880bb1727783d45965d07d84d89a48&with_genres=${genreId}`;
+  const url = `https://api.themoviedb.org/3/discover/movie?api_key=${MOVIE_DB_API_KEY}&with_genres=${genreId}`;
 
   try {
     const response = await axios.get(url, {
