@@ -1,13 +1,31 @@
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
 
 export function Navbar() {
-    return (
-      <nav className="min-w-full px-20 py-6">
-        <div className="bg-white flex justify-center items-center bg-opacity-10 w-full py-6 shadow-sm rounded-lg">
-          <Link href="/" className="text-4xl font-bold">
-            <span className="text-red-500">Mood</span>Flix
-          </Link>
-        </div>
-      </nav>
-    );
+  return (
+    <nav className="min-w-full px-20 py-6">
+      <div className="bg-white flex justify-between items-center bg-opacity-10 w-full py-6 px-6 shadow-sm rounded-lg">
+        <Link href="/" className="text-4xl font-bold">
+          <span className="text-red-500">Mood</span>Flix
+        </Link>
+
+        <SignedIn>
+            <UserButton showName />
+        </SignedIn>
+
+        <SignedOut>
+          <SignInButton>
+            <button className="bg-[#0F0F0F] shadow-md py-2 px-4 rounded-lg">
+              <span className="font-semibold">Sign in</span>
+            </button>
+          </SignInButton>
+        </SignedOut>
+      </div>
+    </nav>
+  );
 }
