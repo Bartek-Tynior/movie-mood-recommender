@@ -53,6 +53,28 @@ export default function MoviesPage() {
     }
   };
 
+  const handleSaveMovie = async (movie) => {
+    try {
+      const response = await fetch("/api/saved-movies", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(movie),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save movie");
+      }
+
+      alert("Movie saved to watchlist!");
+    } catch (error) {
+      console.error("Error saving movie:", error);
+      alert(error.message);
+    }
+  };
+
   return (
     <div className="w-full px-20 mx-auto">
       <h1 className="text-2xl font-bold mb-6">Movies for Mood: {mood}</h1>
@@ -91,6 +113,12 @@ export default function MoviesPage() {
               className="px-4 py-2 bg-transparent text-white border border-red-500 rounded disabled:opacity-50 hover:bg-red-500"
             >
               Previous
+            </button>
+            <button
+              onClick={() => handleSaveMovie(currentMovie)}
+              className="px-4 py-2 bg-transparent text-white border border-red-500 rounded disabled:opacity-50 hover:bg-red-500"
+            >
+              Add to Watchlist
             </button>
             <button
               onClick={handleNext}
