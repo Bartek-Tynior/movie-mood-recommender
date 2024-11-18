@@ -1,7 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function MoviesPage() {
   const searchParams = useSearchParams();
@@ -12,30 +14,39 @@ export default function MoviesPage() {
   const [page, setPage] = useState(1);
   const [noMoreMovies, setNoMoreMovies] = useState(false);
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch movies");
-        }
-        const data = await response.json();
-        
-        if (data.movies.length === 0) {
-          setNoMoreMovies(true);
-        } else {
-          setMovies((prev) => [...prev, ...data.movies]);
-        }
-      } catch (error) {
-        console.error("Error fetching movies:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+const isFetching = useRef(false);
 
-    fetchMovies();
-  }, [mood, page]);
+useEffect(() => {
+  if (!mood || !page || isFetching.current) return;
+
+  const fetchMovies = async () => {
+    isFetching.current = true;
+    setLoading(true);
+
+    try {
+      const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
+      }
+      const data = await response.json();
+
+      if (data.movies.length === 0) {
+        setNoMoreMovies(true);
+      } else {
+        setMovies((prev) => [...prev, ...data.movies]);
+      }
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+      toast.error("Failed to fetch movies. Please try again later.");
+    } finally {
+      setLoading(false);
+      isFetching.current = false;
+    }
+  };
+
+  fetchMovies();
+}, [mood, page]);
+
 
   const currentMovie = movies[currentIndex];
 
@@ -68,21 +79,23 @@ export default function MoviesPage() {
         throw new Error(errorData.error || "Failed to save movie");
       }
 
-      alert("Movie saved to watchlist!");
+      toast.success("Movie saved to watchlist!");
     } catch (error) {
       console.error("Error saving movie:", error);
-      alert(error.message);
+      toast.error("Failed to save movie. Please try again later.");
     }
   };
 
   return (
     <div className="w-full px-20 mx-auto">
+      <ToastContainer
+        position="top-right"
+        hideProgressBar
+        autoClose={2000}
+        theme="dark"
+      />
       <h1 className="text-2xl font-bold mb-6">Movies for Mood: {mood}</h1>
-      {loading && currentIndex >= movies.length ? (
-        <div className="w-full flex justify-center items-center">
-          Loading...
-        </div>
-      ) : currentMovie ? (
+      { currentMovie ? (
         <div className="w-full h-2/3 flex flex-col items-center">
           <div className="rounded-md bg-white bg-opacity-10 w-full h-96 flex flex-col justify-between shadow-lg">
             <img

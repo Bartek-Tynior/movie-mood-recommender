@@ -12,7 +12,7 @@ export function Navbar() {
         <SignedIn>
           <div className="flex flex-row gap-6">
             <Link
-              className="bg-[#0F0F0F] flex justify-center items-center text-white font-bold text-sm py-2 px-4 rounded-lg shadow-md"
+              className="bg-[#0F0F0F] primary-btn-focus flex justify-center items-center text-white font-bold text-sm py-2 px-4 rounded-lg shadow-md"
               href={"/saved-movies"}
             >
               Your Watchlist
