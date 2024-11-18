@@ -16,10 +16,32 @@ const moodToGenre = {
   Curious: 878, // Science Fiction
 };
 
+const genreToMood = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
+};
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const mood = searchParams.get("mood");
+  const page = searchParams.get("page") || 1;
 
   if (!mood || !moodToGenre[mood]) {
     return NextResponse.json(
@@ -29,7 +51,7 @@ export async function GET(req) {
   }
 
   const genreId = moodToGenre[mood];
-  const url = `https://api.themoviedb.org/3/discover/movie?api_key=${MOVIE_DB_API_KEY}&with_genres=${genreId}`;
+  const url = `https://api.themoviedb.org/3/discover/movie?api_key=${MOVIE_DB_API_KEY}&with_genres=${genreId}&page=${page}`;
 
   try {
     const response = await axios.get(url, {
@@ -42,13 +64,13 @@ export async function GET(req) {
       rating: movie.vote_average,
       duration: `${movie.runtime} min`,
       description: movie.overview,
-      genres: movie.genre_ids,
+      genres: movie.genre_ids.map((genreId) => genreToMood[genreId]),
       poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
     }));
 
     return NextResponse.json({ mood, movies }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching movies:", error.message);
+    console.error("Error fetching movies:", (error as Error).message);
     return NextResponse.json(
       { error: "Failed to fetch movies." },
       { status: 500 }

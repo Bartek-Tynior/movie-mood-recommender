@@ -6,41 +6,44 @@ import { useEffect, useState } from "react";
 export default function MoviesPage() {
   const searchParams = useSearchParams();
   const mood = searchParams.get("mood");
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [noMoreMovies, setNoMoreMovies] = useState(false);
 
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/movies?mood=${mood}`);
+        const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
         if (!response.ok) {
           throw new Error("Failed to fetch movies");
         }
         const data = await response.json();
-        setMovies(data.movies);
+        
+        if (data.movies.length === 0) {
+          setNoMoreMovies(true);
+        } else {
+          setMovies((prev) => [...prev, ...data.movies]);
+        }
       } catch (error) {
-        console.error("Error fetching movies:", error.message);
+        console.error("Error fetching movies:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (mood) fetchMovies();
-  }, [mood]);
-
-  if (loading) {
-    return (
-      <div className="w-full flex justify-center items-center">Loading...</div>
-    );
-  }
+    fetchMovies();
+  }, [mood, page]);
 
   const currentMovie = movies[currentIndex];
 
   const handleNext = () => {
     if (currentIndex < movies.length - 1) {
       setCurrentIndex(currentIndex + 1);
+    } else if (!noMoreMovies) {
+      setPage((prevPage) => prevPage + 1);
     }
   };
 
@@ -53,7 +56,11 @@ export default function MoviesPage() {
   return (
     <div className="w-full px-20 mx-auto">
       <h1 className="text-2xl font-bold mb-6">Movies for Mood: {mood}</h1>
-      {currentMovie ? (
+      {loading && currentIndex >= movies.length ? (
+        <div className="w-full flex justify-center items-center">
+          Loading...
+        </div>
+      ) : currentMovie ? (
         <div className="w-full h-2/3 flex flex-col items-center">
           <div className="rounded-md bg-white bg-opacity-10 w-full h-96 flex flex-col justify-between shadow-lg">
             <img
@@ -64,7 +71,9 @@ export default function MoviesPage() {
             <div className="p-4 flex flex-col gap-2 h-full overflow-hidden">
               <h2 className="font-bold text-lg">{currentMovie.title}</h2>
               <p className="text-sm text-gray-500">{currentMovie.year}</p>
-              <p className="text-sm text-gray-500">{currentMovie.rating}</p>
+              <p className="text-sm text-gray-500">
+                Rating: {currentMovie.rating}
+              </p>
               {currentMovie.genres && (
                 <p className="text-sm text-gray-500">
                   Genres: {currentMovie.genres.join(", ")}
@@ -85,7 +94,7 @@ export default function MoviesPage() {
             </button>
             <button
               onClick={handleNext}
-              disabled={currentIndex === movies.length - 1}
+              disabled={noMoreMovies && currentIndex === movies.length - 1}
               className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
             >
               Next
