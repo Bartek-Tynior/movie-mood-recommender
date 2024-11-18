@@ -1,5 +1,6 @@
 "use client";
 
+import { Clapperboard, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
@@ -14,39 +15,38 @@ export default function MoviesPage() {
   const [page, setPage] = useState(1);
   const [noMoreMovies, setNoMoreMovies] = useState(false);
 
-const isFetching = useRef(false);
+  const isFetching = useRef(false);
 
-useEffect(() => {
-  if (!mood || !page || isFetching.current) return;
+  useEffect(() => {
+    if (!mood || !page || isFetching.current) return;
 
-  const fetchMovies = async () => {
-    isFetching.current = true;
-    setLoading(true);
+    const fetchMovies = async () => {
+      isFetching.current = true;
+      setLoading(true);
 
-    try {
-      const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch movies");
+      try {
+        const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch movies");
+        }
+        const data = await response.json();
+
+        if (data.movies.length === 0) {
+          setNoMoreMovies(true);
+        } else {
+          setMovies((prev) => [...prev, ...data.movies]);
+        }
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+        toast.error("Failed to fetch movies. Please try again later.");
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
       }
-      const data = await response.json();
+    };
 
-      if (data.movies.length === 0) {
-        setNoMoreMovies(true);
-      } else {
-        setMovies((prev) => [...prev, ...data.movies]);
-      }
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-      toast.error("Failed to fetch movies. Please try again later.");
-    } finally {
-      setLoading(false);
-      isFetching.current = false;
-    }
-  };
-
-  fetchMovies();
-}, [mood, page]);
-
+    fetchMovies();
+  }, [mood, page]);
 
   const currentMovie = movies[currentIndex];
 
@@ -87,56 +87,68 @@ useEffect(() => {
   };
 
   return (
-    <div className="w-full px-20 mx-auto">
+    <div className="w-full px-32 mx-auto">
       <ToastContainer
         position="top-right"
         hideProgressBar
         autoClose={2000}
         theme="dark"
       />
-      <h1 className="text-2xl font-bold mb-6">Movies for Mood: {mood}</h1>
-      { currentMovie ? (
+      <h1 className="text-2xl font-bold mb-8">
+        Feeling <span className="text-red-500">{mood}</span>...
+      </h1>
+      {currentMovie ? (
         <div className="w-full h-2/3 flex flex-col items-center">
-          <div className="rounded-md bg-white bg-opacity-10 w-full h-96 flex flex-col justify-between shadow-lg">
+          <div className="rounded-md bg-white bg-opacity-10 w-full flex flex-row justify-between shadow-lg">
             <img
               src={currentMovie.poster}
               alt={currentMovie.title}
-              className="w-full h-48 object-cover rounded-t-md"
+              className="w-96 object-fit rounded-l-md shadow-lg"
             />
-            <div className="p-4 flex flex-col gap-2 h-full overflow-hidden">
-              <h2 className="font-bold text-lg">{currentMovie.title}</h2>
-              <p className="text-sm text-gray-500">{currentMovie.year}</p>
-              <p className="text-sm text-gray-500">
-                Rating: {currentMovie.rating}
-              </p>
-              {currentMovie.genres && (
-                <p className="text-sm text-gray-500">
-                  Genres: {currentMovie.genres.join(", ")}
+            <div className="px-8 py-4 flex flex-col gap-4 h-full overflow-hidden">
+              <h2 className="font-bold text-3xl">{currentMovie.title}</h2>
+              <div className="flex flex-row gap-6">
+                <p className="text-lg font-semibold text-gray-500 flex gap-2">
+                  <Clapperboard />
+                  {currentMovie.year}
                 </p>
-              )}
-              <p className="text-sm mt-2 font-medium overflow-hidden text-ellipsis h-16">
+                <p className="text-lg font-semibold text-gray-500 flex gap-2">
+                  <Star className="text-yellow-500" />
+                  {currentMovie.rating}
+                </p>
+              </div>
+              <div className="flex flex-row gap-2">
+                {currentMovie.genres.map((genre, index) => (
+                  <div key={index} className="bg-red-500 shadow-md rounded-md py-1 px-2">
+                    <span className="text-sm text-white font-semibold">
+                      {genre}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-base mt-2 font-medium">
                 {currentMovie.description}
               </p>
             </div>
           </div>
-          <div className="flex mt-4 gap-4">
+          <div className="flex flex-row mt-8 gap-12">
             <button
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="px-4 py-2 bg-transparent text-white border border-red-500 rounded disabled:opacity-50 hover:bg-red-500"
+              className="px-4 py-2 font-semibold bg-transparent text-white border border-red-500 rounded-md disabled:opacity-50 hover:bg-red-500 shadow-md"
             >
               Previous
             </button>
             <button
               onClick={() => handleSaveMovie(currentMovie)}
-              className="px-4 py-2 bg-transparent text-white border border-red-500 rounded disabled:opacity-50 hover:bg-red-500"
+              className="px-4 py-2 font-semibold bg-transparent text-white border border-red-500 rounded-md disabled:opacity-50 hover:bg-red-500 shadow-md"
             >
               Add to Watchlist
             </button>
             <button
               onClick={handleNext}
               disabled={noMoreMovies && currentIndex === movies.length - 1}
-              className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
+              className="px-4 py-2 font-semibold bg-red-500 text-white rounded-md disabled:opacity-50 shadow-md"
             >
               Next
             </button>

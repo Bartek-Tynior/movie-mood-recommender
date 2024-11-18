@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description: "Watch movies and TV shows based on your mood.",
 };
 
-const satoshi = localFont({
-  src: "./fonts/Satoshi-Regular.woff2",
-  variable: "--font-satoshi",
+const nunito = localFont({
+  src: "./fonts//Nunito-VariableFont_wght.ttf",
+  variable: "--font-nunito",
 });
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
         <body
           className={cn(
             "min-h-screen bg-[#0F0F0F] text-white font-sans antialiased select-none",
-            satoshi.variable
+            nunito.variable
           )}
         >
           <Navbar />
