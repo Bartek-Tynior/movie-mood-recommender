@@ -83,3 +83,43 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // Authenticate the user
+    const { userId } = getAuth(req);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized access" },
+        { status: 401 }
+      );
+    }
+
+    // Parse the request body
+    const body = await req.json();
+
+    if (!body || !body.id) {
+      return NextResponse.json(
+        { error: "Invalid request data" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the movie from the database
+    await db
+      .delete(savedMovies)
+      .where(eq(savedMovies.id, body.id) && eq(savedMovies.userId, userId));
+
+    return NextResponse.json(
+      { message: "Movie deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting movie:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
