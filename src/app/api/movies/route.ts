@@ -61,7 +61,7 @@ export async function GET(req) {
     const movies = response.data.results.map((movie) => ({
       title: movie.title,
       year: movie.release_date?.split("-")[0] || "Unknown",
-      rating: movie.vote_average,
+      rating: movie.vote_average.toFixed(1),
       duration: `${movie.runtime} min`,
       description: movie.overview,
       genres: movie.genre_ids.map((genreId) => genreToMood[genreId]),

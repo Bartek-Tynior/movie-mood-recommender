@@ -22,27 +22,30 @@ export default function MoviesPage() {
 
     const fetchMovies = async () => {
       isFetching.current = true;
-      setLoading(true);
+      setLoading(true); // Show loading while fetching
 
-      try {
-        const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch movies");
-        }
-        const data = await response.json();
+      setTimeout(async () => {
+        // Simulate a delay in fetching movies
+        try {
+          const response = await fetch(`/api/movies?mood=${mood}&page=${page}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch movies");
+          }
+          const data = await response.json();
 
-        if (data.movies.length === 0) {
-          setNoMoreMovies(true);
-        } else {
-          setMovies((prev) => [...prev, ...data.movies]);
+          if (data.movies.length === 0) {
+            setNoMoreMovies(true);
+          } else {
+            setMovies((prev) => [...prev, ...data.movies]);
+          }
+        } catch (error) {
+          console.error("Error fetching movies:", error);
+          toast.error("Failed to fetch movies. Please try again later.");
+        } finally {
+          setLoading(false); // Hide loading after the fetch completes
+          isFetching.current = false;
         }
-      } catch (error) {
-        console.error("Error fetching movies:", error);
-        toast.error("Failed to fetch movies. Please try again later.");
-      } finally {
-        setLoading(false);
-        isFetching.current = false;
-      }
+      }, 1500);
     };
 
     fetchMovies();
@@ -97,7 +100,20 @@ export default function MoviesPage() {
       <h1 className="text-2xl font-bold mb-8">
         Feeling <span className="text-red-500">{mood}</span>...
       </h1>
-      {currentMovie ? (
+
+      {loading ? (
+        // Show loading state while movies are being fetched
+        <div className="flex justify-center items-center h-64">
+          <p className="text-xl text-white">
+            Loading movies for <strong className="text-red-500">{mood}</strong>
+            ...
+          </p>
+        </div>
+      ) : movies.length === 0 ? (
+        // Show "No movies found" only after loading is done and movies are empty
+        <p>No movies found for this mood.</p>
+      ) : (
+        // Render movies only if available
         <div className="w-full h-2/3 flex flex-col items-center">
           <div className="rounded-md bg-white bg-opacity-10 w-full flex flex-row justify-between shadow-lg">
             <img
@@ -119,7 +135,10 @@ export default function MoviesPage() {
               </div>
               <div className="flex flex-row gap-2">
                 {currentMovie.genres.map((genre, index) => (
-                  <div key={index} className="bg-red-500 shadow-md rounded-md py-1 px-2">
+                  <div
+                    key={index}
+                    className="bg-red-500 shadow-md rounded-md py-1 px-2"
+                  >
                     <span className="text-sm text-white font-semibold">
                       {genre}
                     </span>
@@ -143,7 +162,7 @@ export default function MoviesPage() {
               onClick={() => handleSaveMovie(currentMovie)}
               className="px-4 py-2 font-semibold bg-transparent text-white border border-red-500 rounded-md disabled:opacity-50 hover:bg-red-500 shadow-md"
             >
-              Add to Watchlist
+              Add to Watchlist 🍿
             </button>
             <button
               onClick={handleNext}
@@ -154,8 +173,6 @@ export default function MoviesPage() {
             </button>
           </div>
         </div>
-      ) : (
-        <p>No movies found for this mood.</p>
       )}
     </div>
   );

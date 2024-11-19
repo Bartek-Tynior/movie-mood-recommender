@@ -15,7 +15,7 @@ export function Navbar() {
               className="bg-[#0F0F0F] primary-btn-focus flex justify-center items-center text-white font-bold text-sm py-2 px-4 rounded-lg shadow-md"
               href={"/saved-movies"}
             >
-              Your Watchlist
+              Your Watchlist 🍿
             </Link>
             <UserButton showName />
           </div>

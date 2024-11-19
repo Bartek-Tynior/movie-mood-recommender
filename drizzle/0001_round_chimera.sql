@@ -1,0 +1,1 @@
+ALTER TABLE `saved_movies` ADD `genres` json;

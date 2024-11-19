@@ -1,7 +1,8 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse, NextRequest } from "next/server";
-
-const savedMovies = new Map(); // Temporary storage (replace with DB)
+import { db } from "@/db/db";
+import { savedMovies } from "@/db/schema"; // Update the path to your Drizzle schema
+import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,12 +26,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Save the movie for the user
-    if (!savedMovies.has(userId)) {
-      savedMovies.set(userId, []);
-    }
-
-    savedMovies.get(userId).push(body);
+    // Save the movie to the database
+    await db.insert(savedMovies).values({
+      title: body.title,
+      year: body.year || null,
+      rating: body.rating || null,
+      genres: JSON.stringify(body.genres || []), // Save genres as a JSON string
+      description: body.description || null,
+      userId, // Associate the movie with the authenticated user
+      poster: body.poster || null,
+    });
 
     return NextResponse.json(
       { message: "Movie saved successfully" },
@@ -45,8 +50,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: Request) {
-
+export async function GET(req: NextRequest) {
   try {
     // Authenticate the user
     const { userId } = getAuth(req);
@@ -58,10 +62,19 @@ export async function GET(req: Request) {
       );
     }
 
-    // Get the saved movies for the user
-    const movies = savedMovies.get(userId) || [];
+    // Fetch saved movies for the user from the database
+    const usersMovies = await db
+      .select()
+      .from(savedMovies)
+      .where(eq(savedMovies.userId, userId));
 
-    return NextResponse.json({ movies }, { status: 200 });
+    // Parse genres back to arrays before returning
+    const moviesWithGenres = usersMovies.map((movie) => ({
+      ...movie,
+      genres: JSON.parse(movie.genres as string),
+    }));
+
+    return NextResponse.json({ movies: moviesWithGenres }, { status: 200 });
   } catch (error) {
     console.error("Error fetching saved movies:", error);
     return NextResponse.json(
@@ -69,5 +82,4 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
-
 }
