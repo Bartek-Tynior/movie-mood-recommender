@@ -1,6 +1,11 @@
 "use client";
 
-export default function MoodCard({ mood, onClick }) {
+interface Mood {
+  name: string;
+  description: string;
+}
+
+export default function MoodCard({ mood, onClick }: { mood: Mood; onClick: (mood: string) => void }) {
   const handleClick = () => {
     onClick(mood.name);
   };

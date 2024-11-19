@@ -10,10 +10,13 @@ export default function Home() {
   const [currentMood, setCurrentMood] = useState("");
   const router = useRouter();
 
-  const handleMoodClick = (mood) => {
+  const handleMoodClick = (moodName: string) => {
     setLoading(true);
-    setCurrentMood(mood);
-    router.push(`/movies?mood=${mood}`);
+    const mood = content.moods.find((mood) => mood.name === moodName);
+    if (mood) {
+      setCurrentMood(mood.name);
+      router.push(`/movies?mood=${mood.name}`);
+    }
   };
 
   return (

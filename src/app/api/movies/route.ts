@@ -3,6 +3,16 @@ import axios from "axios";
 
 const MOVIE_DB_API_KEY = process.env.MOVIE_DB_KEY;
 
+interface Movie {
+  title: string;
+  release_date: string;
+  vote_average: number;
+  runtime: string;
+  overview: string;
+  genre_ids: string[];
+  poster_path: string;
+}
+
 const moodToGenre = {
   Happy: 35, // Comedy
   Sad: 18, // Drama
@@ -38,9 +48,11 @@ const genreToMood = {
   37: "Western",
 };
 
-export async function GET(req) {
+import { NextRequest } from "next/server";
+
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const mood = searchParams.get("mood");
+  const mood = searchParams.get("mood") as keyof typeof moodToGenre;
   const page = searchParams.get("page") || 1;
 
   if (!mood || !moodToGenre[mood]) {
@@ -58,7 +70,7 @@ export async function GET(req) {
       headers: { accept: "application/json" },
     });
 
-    const movies = response.data.results.map((movie) => ({
+    const movies = response.data.results.map((movie: Movie) => ({
       title: movie.title,
       year: movie.release_date?.split("-")[0] || "Unknown",
       rating: movie.vote_average.toFixed(1),
